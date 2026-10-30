@@ -1,11 +1,14 @@
 package com.example.gravitymaze
 
+import android.R
+import android.content.res.Resources
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import android.os.Bundle
 import android.os.SystemClock
+import android.view.Display
 import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -41,6 +44,19 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.example.gravitymaze.ui.theme.GravityMazeTheme
 import kotlinx.coroutines.delay
+
+val mazeGrid = arrayOf(
+    intArrayOf(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
+    intArrayOf(1, 0, 0, 0, 1, 0, 0, 0, 2, 1),
+    intArrayOf(1, 0, 1, 0, 1, 0, 1, 1, 0, 1),
+    intArrayOf(1, 0, 1, 0, 0, 0, 1, 0, 0, 1),
+    intArrayOf(1, 0, 1, 1, 1, 1, 1, 0, 1, 1),
+    intArrayOf(1, 0, 0, 0, 0, 0, 0, 0, 0, 1),
+    intArrayOf(1, 1, 1, 1, 1, 0, 1, 1, 0, 1),
+    intArrayOf(1, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+    intArrayOf(1, 0, 1, 0, 0, 0, 1, 1, 0, 1),
+    intArrayOf(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
+)
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -134,31 +150,32 @@ fun SensorScreen(modifier: Modifier, xA: Float, yA: Float, zA: Float, xG: Float,
     }
 }
 
+
 @Composable
 fun CustomCanvas(modifier: Modifier) {
     //val image = ImageBitmap.imageResource((R.drawable.banana))
+    //val height = Resources.getSystem().configuration.screenHeightDp.toFloat()
+    //val width = Resources.getSystem().configuration.screenWidthDp.toFloat()
 
-    Canvas(modifier = Modifier.size(width = 200.dp, height = 400.dp)) {
+    var offsetX = 0f
+    var offsetY = 0f
+    var squareSize = 25f
 
-        var offsetX = 0f
-        var offsetY = 0f
+    Canvas(modifier = Modifier.size(width = 250.dp, height = 250.dp)) {
 
-        for (i in 1..10)
+        for (i in 0..9)
         {
-            drawRect(
-                //topLeft = Offset(x = 400f, y = 0f),
-                color = Color.Blue,
-                size = Size(50.dp.toPx(), 50.dp.toPx())
-            )
+            for (j in 0..9)
+            {
+                if (mazeGrid[i][j] == 1) {
+                    drawRect(
+                        topLeft = Offset(x = j * squareSize, y = i * squareSize),
+                        color = Color.Blue,
+                        size = Size(25.dp.toPx(), 25.dp.toPx())
+                    )
+                }
+            }
         }
-
-
-
-//        drawCircle(
-//            color = Color.Red,
-//            radius = 40.dp.toPx(),
-//            center = Offset(40.dp.toPx(), 200.dp.toPx())
-//        )
     }
 }
 
