@@ -52,9 +52,7 @@ class MazeGame {
 
     private fun inBounds(x : Int, y : Int) = y in 0 until rows && x in 0 until cols
 
-    fun isAir(x: Int, y: Int) = inBounds(x, y) && map[y][x] == 0
     fun isWall(x: Int, y: Int) = !inBounds(x, y) || map[y][x] == 1
-    fun isStart(x: Int, y: Int) = inBounds(x, y) && map[y][x] == 2
     fun isEnd(x: Int, y: Int) = inBounds(x, y) && map[y][x] == 3
 
     private fun collides(colX: Float, colY: Float): Boolean {
