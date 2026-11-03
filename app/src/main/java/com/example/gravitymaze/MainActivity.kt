@@ -178,7 +178,7 @@ fun CustomCanvas(modifier: Modifier) {
                 }
             }
 
-            val circleSize = size.width / 10f;
+            val circleSize = size.width / 15f;
 
             drawCircle(color = Color.Yellow, radius = circleSize / 2,
                        center = Offset(size.width * .15f, size.height * .15f))
