@@ -47,7 +47,7 @@ import kotlinx.coroutines.delay
 
 val mazeGrid = arrayOf(
     intArrayOf(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-    intArrayOf(1, 0, 0, 0, 1, 0, 0, 0, 2, 1),
+    intArrayOf(1, 0, 0, 0, 1, 0, 0, 0, 0, 1),
     intArrayOf(1, 0, 1, 0, 1, 0, 1, 1, 0, 1),
     intArrayOf(1, 0, 1, 0, 0, 0, 1, 0, 0, 1),
     intArrayOf(1, 0, 1, 1, 1, 1, 1, 0, 1, 1),
@@ -153,27 +153,22 @@ fun SensorScreen(modifier: Modifier, xA: Float, yA: Float, zA: Float, xG: Float,
 
 @Composable
 fun CustomCanvas(modifier: Modifier) {
-    //val image = ImageBitmap.imageResource((R.drawable.banana))
-    //val height = Resources.getSystem().configuration.screenHeightDp.toFloat()
-    //val width = Resources.getSystem().configuration.screenWidthDp.toFloat()
 
     var offsetX = 0f
     var offsetY = 0f
-    var squareSize = 25f
+    var squareSize = 100f
 
-    Canvas(modifier = Modifier.size(width = 250.dp, height = 250.dp)) {
+    Canvas(modifier = Modifier.size(width = 500.dp, height = 500.dp)) {
 
         for (i in 0..9)
         {
             for (j in 0..9)
             {
-                if (mazeGrid[i][j] == 1) {
-                    drawRect(
-                        topLeft = Offset(x = j * squareSize, y = i * squareSize),
-                        color = Color.Blue,
-                        size = Size(25.dp.toPx(), 25.dp.toPx())
-                    )
-                }
+                drawRect(
+                    topLeft = Offset(x = j * squareSize, y = i * squareSize),
+                    color = if (mazeGrid[i][j] == 0) Color.White else Color.Blue,
+                    size = Size(squareSize, squareSize)
+                )
             }
         }
     }
