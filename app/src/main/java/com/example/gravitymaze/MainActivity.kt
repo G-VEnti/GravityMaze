@@ -15,11 +15,15 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -30,6 +34,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
@@ -47,14 +52,14 @@ import kotlinx.coroutines.delay
 
 val mazeGrid = arrayOf(
     intArrayOf(1, 1, 1, 1, 1, 1, 1, 1, 1, 1),
-    intArrayOf(1, 0, 0, 0, 1, 0, 0, 0, 0, 1),
+    intArrayOf(1, 2, 0, 0, 1, 0, 0, 0, 0, 1),
     intArrayOf(1, 0, 1, 0, 1, 0, 1, 1, 0, 1),
     intArrayOf(1, 0, 1, 0, 0, 0, 1, 0, 0, 1),
     intArrayOf(1, 0, 1, 1, 1, 1, 1, 0, 1, 1),
     intArrayOf(1, 0, 0, 0, 0, 0, 0, 0, 0, 1),
     intArrayOf(1, 1, 1, 1, 1, 0, 1, 1, 0, 1),
     intArrayOf(1, 0, 0, 0, 1, 0, 0, 0, 0, 1),
-    intArrayOf(1, 0, 1, 0, 0, 0, 1, 1, 0, 1),
+    intArrayOf(1, 0, 1, 0, 0, 0, 1, 1, 2, 1),
     intArrayOf(1, 1, 1, 1, 1, 1, 1, 1, 1, 1)
 )
 
@@ -154,21 +159,23 @@ fun SensorScreen(modifier: Modifier, xA: Float, yA: Float, zA: Float, xG: Float,
 @Composable
 fun CustomCanvas(modifier: Modifier) {
 
-    var offsetX = 0f
-    var offsetY = 0f
-    var squareSize = 100f
+    Box(modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)) {
+        Canvas(modifier = Modifier.fillMaxWidth().aspectRatio(1f)) { // aspectRatio força el canvas a ocupar lo mateix entre adalt i abaix
 
-    Canvas(modifier = Modifier.size(width = 500.dp, height = 500.dp)) {
+            val squareSize = size.width / 10f;
 
-        for (i in 0..9)
-        {
-            for (j in 0..9)
+            for (i in 0..9)
             {
-                drawRect(
-                    topLeft = Offset(x = j * squareSize, y = i * squareSize),
-                    color = if (mazeGrid[i][j] == 0) Color.White else Color.Blue,
-                    size = Size(squareSize, squareSize)
-                )
+                for (j in 0..9)
+                {
+                    drawRect(
+                        topLeft = Offset(x = j * squareSize, y = i * squareSize),
+                        color = if (mazeGrid[i][j] == 0) Color.White
+                        else if (mazeGrid[i][j] == 2) Color.Red
+                        else Color.Blue,
+                        size = Size(squareSize, squareSize)
+                    )
+                }
             }
         }
     }
