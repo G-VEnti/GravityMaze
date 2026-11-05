@@ -7,16 +7,22 @@ import android.hardware.SensorManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.material3.Button
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.LargeFloatingActionButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -30,9 +36,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import com.example.gravitymaze.ui.theme.GravityMazeTheme
 import kotlinx.coroutines.delay
-import kotlin.time.Duration.Companion.seconds
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
@@ -50,13 +58,29 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             val game = remember { MazeGame() }
 
             GravityMazeTheme {
+            val navController = rememberNavController()
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    MazeScreen(game, aX, aY, modifier = Modifier.padding(innerPadding))
+                    NavHost(
+                        navController, "home",
+                        modifier = Modifier.padding(innerPadding)
+                    ) {
+                        composable("home") {
+                            HomeScreen(
+                                onBtnClick = {navController.navigate("mazeScreen")}
+                            )
+                        }
+                        composable("mazeScreen"){
+                            MazeScreen(onBtnClick = {navController.navigate("home")}, game,aX, aY, modifier = Modifier.padding(innerPadding))
+                        }
+
+                    }
+
                 }
             }
         }
 
     }
+
 
     override fun onResume() {
         super.onResume()
@@ -83,16 +107,37 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
 }
 
+@Composable
+fun  HomeScreen(
+    modifier: Modifier = Modifier,
+    onBtnClick: () -> Unit
+) {
+    Box(modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center) {
+        Column(
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("WelCUM to the Gravity Maze")
+            ExtendedFloatingActionButton(
+                onClick = onBtnClick
+            ) {
+                Text("Start")
+            }
+        }
+    }
+}
+
 
 @Composable
-fun MazeScreen(game : MazeGame, aX : Float, aY : Float, modifier : Modifier) {
+fun MazeScreen(onBtnClick: () -> Unit, game : MazeGame, aX : Float, aY : Float, modifier : Modifier) {
 
     val currentAx by rememberUpdatedState(aX)
     val currentAy by rememberUpdatedState(aY)
     var ticks by remember { mutableStateOf(0) }
 
     LaunchedEffect(Unit) {
-        while(true) {
+        while (true) {
             delay(16L)
             ticks++
             game.UpdateMaze(0.016f, aX, aY)
@@ -100,36 +145,51 @@ fun MazeScreen(game : MazeGame, aX : Float, aY : Float, modifier : Modifier) {
     }
 
     Box(modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)) {
-        Canvas(modifier = modifier.fillMaxWidth().aspectRatio(1f)) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(ticks.toString())
 
-            val cellWidth = 110f
-            val cellHeight = 110f
+            Canvas(modifier = modifier.fillMaxWidth().aspectRatio(1f)) {
 
-            for (y in 0 until game.rows) {
-                for (x in 0 until game.cols) {
-                    val color = when (game.map[y][x]) {
-                        1 -> Color.DarkGray
-                        3 -> Color.Green
-                        else -> Color.White
+                val cellWidth = 110f
+                val cellHeight = 110f
+
+                for (y in 0 until game.rows) {
+                    for (x in 0 until game.cols) {
+                        val color = when (game.map[y][x]) {
+                            1 -> Color.DarkGray
+                            3 -> Color.Green
+                            else -> Color.White
+                        }
+                        drawRect(
+                            color = color,
+                            topLeft = Offset(x * cellWidth, y * cellHeight),
+                            size = Size(cellWidth, cellHeight)
+                        )
                     }
-                    drawRect(
-                        color = color,
-                        topLeft = Offset(x * cellWidth, y * cellHeight),
-                        size = Size(cellWidth, cellHeight)
-                    )
                 }
+
+                drawCircle(
+                    color = Color.Yellow,
+                    radius = game.ball.radius * cellWidth,
+                    center = Offset(
+                        x = game.ball.position.x * cellWidth,
+                        y = game.ball.position.y * cellHeight
+                    )
+                )
             }
 
-            drawCircle(
-                color = Color.Yellow,
-                radius = game.ball.radius * cellWidth,
-                center = Offset(
-                    x = game.ball.position.x * cellWidth,
-                    y = game.ball.position.y * cellHeight
-                )
-            )
+
+            ExtendedFloatingActionButton(
+                onClick = onBtnClick
+            ) {
+                Text("Back")
+            }
         }
     }
-
 }
+
 
