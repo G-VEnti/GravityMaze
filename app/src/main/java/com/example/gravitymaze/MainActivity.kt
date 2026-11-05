@@ -36,17 +36,20 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.example.gravitymaze.ui.theme.GravityMazeTheme
 import kotlinx.coroutines.delay
+import java.util.stream.Stream
 
 class MainActivity : ComponentActivity(), SensorEventListener {
 
     private lateinit var  sensorManager : SensorManager
     var aX by mutableFloatStateOf(0f)
     var aY by mutableFloatStateOf(0f)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
 
@@ -70,15 +73,33 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                             )
                         }
                         composable("mazeScreen"){
-                            MazeScreen(onBtnClick = {navController.navigate("home")}, game,aX, aY, modifier = Modifier.padding(innerPadding))
+                            MazeScreen(
+                                onBackClick = {navController.popBackStack()},
+                                onFinishClick = {timer -> navController.navigate("gameOver/$timer")},
+                                game,
+                                aX,
+                                aY,
+                                modifier = Modifier.padding(innerPadding))
                         }
-
+                        composable("gameOver/{timer}") { backStackEntry ->
+                            val timer = backStackEntry.arguments?.getString("timer")?: "00.00"
+                            GameOverScreen(
+                                finalTime = timer,
+                                homeOnClick = {
+                                    navController.navigate("home") {
+                                        popUpTo("home") {
+                                            inclusive = false
+                                        }
+                                        launchSingleTop = true
+                                    }
+                                },
+                                restartOnClick = {navController.popBackStack()}
+                            )
+                        }
                     }
-
                 }
             }
         }
-
     }
 
 
@@ -87,7 +108,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
         sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let{
             sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
         }
-
     }
 
     override fun onPause() {
@@ -103,8 +123,6 @@ class MainActivity : ComponentActivity(), SensorEventListener {
             aY = event.values[1]
         }
     }
-
-
 }
 
 @Composable
@@ -130,11 +148,18 @@ fun  HomeScreen(
 
 
 @Composable
-fun MazeScreen(onBtnClick: () -> Unit, game : MazeGame, aX : Float, aY : Float, modifier : Modifier) {
+fun MazeScreen(onBackClick: () -> Unit,
+               onFinishClick: (String) -> Unit,
+               game : MazeGame,
+               aX : Float,
+               aY : Float,
+               modifier : Modifier) {
 
     val currentAx by rememberUpdatedState(aX)
     val currentAy by rememberUpdatedState(aY)
     var ticks by remember { mutableStateOf(0) }
+    var timer = android.text.format.DateUtils.formatElapsedTime((ticks/60).toLong())
+
 
     LaunchedEffect(Unit) {
         while (true) {
@@ -150,7 +175,7 @@ fun MazeScreen(onBtnClick: () -> Unit, game : MazeGame, aX : Float, aY : Float, 
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(ticks.toString())
+            Text(timer)
 
             Canvas(modifier = modifier.fillMaxWidth().aspectRatio(1f)) {
 
@@ -182,11 +207,58 @@ fun MazeScreen(onBtnClick: () -> Unit, game : MazeGame, aX : Float, aY : Float, 
                 )
             }
 
-
-            ExtendedFloatingActionButton(
-                onClick = onBtnClick
+            Row(
+                modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("Back")
+                ExtendedFloatingActionButton(
+                    onClick = onBackClick
+                ) {
+                    Text("Back")
+                }
+
+                // TEMPORAL BUTTON FOR TEST PURPOSE
+                ExtendedFloatingActionButton(
+                    onClick = { onFinishClick(timer) }
+
+                ) {
+                    Text("Finish")
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun  GameOverScreen(
+    modifier: Modifier = Modifier,
+    homeOnClick: () -> Unit,
+    restartOnClick: () -> Unit,
+    finalTime: String
+) {
+    Box(modifier = modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center) {
+        Column(
+            verticalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterVertically),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text("Finished in $finalTime")
+            Text("Do you want to play again?")
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = restartOnClick,
+
+                ) {
+                    Text("Restart")
+                }
+                ExtendedFloatingActionButton(
+                    onClick = homeOnClick
+                ) {
+                    Text("Main menu")
+                }
             }
         }
     }
