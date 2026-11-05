@@ -30,12 +30,12 @@ class MazeGame {
 
     }
 
-    private companion object {
-        const val TILT_STRENGTH = 12f
-        const val FRICTION = .98f
-        const val BOUNCE = .3f
-        const val MAX_DT = .05f
-    }
+//    private companion object {
+//        const val TILT_STRENGTH = 12f
+//        const val FRICTION = .98f
+//        const val BOUNCE = .3f
+//        const val MAX_DT = .05f
+//    }
 
     val rows = map.size
     val cols = map[0].size
@@ -67,13 +67,16 @@ class MazeGame {
     fun UpdateMaze(dt : Float, aX : Float, aY : Float) {
 
         if (won) return
-        val movement = dt.coerceAtMost(MAX_DT)
+        val movement = dt.coerceAtMost(0.05f)
 
-        ball.velocityX += -aX * TILT_STRENGTH * dt
-        ball.velocityY += aY * TILT_STRENGTH * dt
+        ball.velocityX += -aX * dt
+        ball.velocityY += aY * dt
 
-        ball.velocityX *= FRICTION
-        ball.velocityY *= FRICTION
+//        ball.velocityX += -aX * TILT_STRENGTH * dt
+//        ball.velocityY += aY * TILT_STRENGTH * dt
+
+//        ball.velocityX *= .98f
+//        ball.velocityY *= .98f
 
         var x = ball.position.x
         var y = ball.position.y
@@ -81,8 +84,8 @@ class MazeGame {
         val newX = x + ball.velocityX * movement
         val newY = y + ball.velocityY * movement
 
-        if (collides(newX, y)) ball.velocityX = -ball.velocityX * BOUNCE else x = newX
-        if (collides(x, newY)) ball.velocityY = -ball.velocityY * BOUNCE else y = newY
+        if (collides(newX, y)) ball.velocityX = -ball.velocityX * 0.2f else x = newX
+        if (collides(x, newY)) ball.velocityY = -ball.velocityY * 0.2f else y = newY
 
         ball.position = Offset(x, y)
 
