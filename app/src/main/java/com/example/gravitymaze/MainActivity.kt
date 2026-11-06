@@ -71,7 +71,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     ) {
                         composable("home") {
                             HomeScreen(
-                                onBtnClick = {navController.navigate("mazeScreen")},
+                                onBtnClick = {
+                                    game.restart()
+                                    navController.navigate("mazeScreen")
+                                },
                                 tutoOnClick = {navController.navigate("tutoScreen")},
                             )
                         }
