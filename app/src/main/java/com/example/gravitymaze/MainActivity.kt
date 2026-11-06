@@ -71,10 +71,7 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                     ) {
                         composable("home") {
                             HomeScreen(
-                                onBtnClick = {
-                                    game.restart()
-                                    navController.navigate("mazeScreen")
-                                },
+                                onBtnClick = { navController.navigate("mazeScreen")},
                                 tutoOnClick = {navController.navigate("tutoScreen")},
                             )
                         }
@@ -230,6 +227,7 @@ fun MazeScreen(backOnClick: () -> Unit,
     var ticks by remember { mutableStateOf(0) }
     var timer = android.text.format.DateUtils.formatElapsedTime((ticks/60).toLong())
 
+    LaunchedEffect(Unit) { game.restart() }
 
     LaunchedEffect(Unit) {
         while (true) {
