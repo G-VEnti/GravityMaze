@@ -30,24 +30,23 @@ class MazeGame {
 
     }
 
-    private companion object {
-        const val TILT_STRENGTH = 12f
-        const val FRICTION = .98f
-        const val BOUNCE = .3f
-        const val MAX_DT = .05f
-    }
 
     val rows = map.size
     val cols = map[0].size
+    private var iBallPosition : Offset = Offset(0f, 0f)
     val ball = createBallAtStart()
     var won by mutableStateOf(false)
 
     private fun createBallAtStart() : Ball {
         for (y in map.indices)
             for (x in map[0].indices) {
-                if (map[y][x] == 2) return Ball(x + 0.5f, y + 0.5f)
+                if (map[y][x] == 2) {
+                    iBallPosition = Offset(x + 0.5f, y + 0.5f)
+                    return Ball(x + 0.5f, y + 0.5f)
+                }
+
             }
-        error("Map has no ducking start cell")
+        error("Map has no start cell")
     }
 
     private fun inBounds(x : Int, y : Int) = y in 0 until rows && x in 0 until cols
@@ -64,16 +63,20 @@ class MazeGame {
                 isWall(floor(colX - r).toInt(), floor(colY + r).toInt())
     }
 
+    fun restart()  {
+        ball.position = iBallPosition
+        ball.velocityX = 0.0f
+        ball.velocityY = 0.0f
+        won = false
+    }
+
     fun UpdateMaze(dt : Float, aX : Float, aY : Float) {
 
         if (won) return
-        val movement = dt.coerceAtMost(MAX_DT)
+        val movement = dt.coerceAtMost(0.05f)
 
-        ball.velocityX += -aX * TILT_STRENGTH * dt
-        ball.velocityY += aY * TILT_STRENGTH * dt
-
-        ball.velocityX *= FRICTION
-        ball.velocityY *= FRICTION
+        ball.velocityX += -aX * dt
+        ball.velocityY += aY * dt
 
         var x = ball.position.x
         var y = ball.position.y
@@ -81,13 +84,14 @@ class MazeGame {
         val newX = x + ball.velocityX * movement
         val newY = y + ball.velocityY * movement
 
-        if (collides(newX, y)) ball.velocityX = -ball.velocityX * BOUNCE else x = newX
-        if (collides(x, newY)) ball.velocityY = -ball.velocityY * BOUNCE else y = newY
+        if (collides(newX, y)) ball.velocityX = -ball.velocityX * .2f else x = newX
+        if (collides(x, newY)) ball.velocityY = -ball.velocityY * .2f else y = newY
 
         ball.position = Offset(x, y)
 
         if (isEnd(floor(x).toInt(), floor(y).toInt())) won = true
 
     }
+
 
 }

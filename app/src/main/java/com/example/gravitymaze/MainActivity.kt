@@ -109,7 +109,10 @@ class MainActivity : ComponentActivity(), SensorEventListener {
                                         launchSingleTop = true
                                     }
                                 },
-                                restartOnClick = {navController.popBackStack()}
+                                restartOnClick = {
+                                    game.restart()
+                                    navController.popBackStack()
+                                }
                             )
                         }
                     }
@@ -121,9 +124,8 @@ class MainActivity : ComponentActivity(), SensorEventListener {
 
     override fun onResume() {
         super.onResume()
-        sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)?.let{
-            sensorManager.registerListener(this, it, SensorManager.SENSOR_DELAY_GAME)
-        }
+        val accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER) ?: error("No accelerometer available")
+        sensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME)
     }
 
     override fun onPause() {
@@ -230,8 +232,12 @@ fun MazeScreen(backOnClick: () -> Unit,
         while (true) {
             delay(16L)
             ticks++
-            game.UpdateMaze(0.016f, aX, aY)
+            game.UpdateMaze(0.016f, currentAx, currentAy)
         }
+    }
+
+    LaunchedEffect(game.won) {
+        if (game.won) onFinishClick(timer)
     }
 
     Box(modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)) {
@@ -320,6 +326,7 @@ fun  GameOverScreen(
 
                 ) {
                     Text("Restart")
+
                 }
                 ExtendedFloatingActionButton(
                     onClick = homeOnClick,
